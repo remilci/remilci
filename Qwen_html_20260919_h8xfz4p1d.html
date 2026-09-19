@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#d97706">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Türkçe Takip">
+<title>Türkçe Takip</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Caveat:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='30' fill='%23fef3c7'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23d97706' font-family='Arial'%3E📓%3C/text%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --paper:#fef9f3;--paper-dark:#fdf6e9;--ink:#1f2937;--ink-light:#4b5563;
+  --accent:#d97706;--accent-light:#fbbf24;--accent-bg:#fef3c7;
+  --blue:#3b82f6;--blue-light:#dbeafe;--red:#ef4444;--green:#10b981;
+  --line:#93c5fd;--margin-line:#fca5a5;
+  --shadow:0 2px 8px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.06);
+  --shadow-lg:0 10px 30px rgba(0,0,0,.12);
+}
+body{
+  font-family:'Inter',sans-serif;
+  background:var(--paper);
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:20px 20px;
+  background-position:-1px -1px;
+  color:var(--ink);min-height:100vh;padding-bottom:80px;font-size:15px;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;left:40px;top:0;bottom:0;width:2px;
+  background:var(--margin-line);opacity:.5;z-index:1;pointer-events:none;
+}
+header{
+  background:linear-gradient(135deg,#fbbf24,#d97706);
+  color:#fff;padding:18px 20px 18px 60px;
+  position:sticky;top:0;z-index:50;
+  box-shadow:0 4px 12px rgba(0,0,0,.1);
+  border-bottom:3px solid #92400e;
+}
+header h1{
+  font-family:'Caveat',cursive;font-size:28px;font-weight:700;
+  display:flex;align-items:center;gap:10px;
+  text-shadow:2px 2px 4px rgba(0,0,0,.2);
+}
+header .sub{
+  font-family:'Patrick Hand',cursive;font-size:14px;opacity:.9;margin-top:2px;
+  letter-spacing:.5px;
+}
+.container{padding:16px 16px 16px 60px;max-width:900px;margin:0 auto}
+.view{display:none}
+.view.active{display:block;animation:fade .3s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{
+  background:var(--paper);border-radius:12px;padding:18px;
+  box-shadow:var(--shadow);margin-bottom:14px;
+  border:1px solid rgba(0,0,0,.05);
+  position:relative;
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-light));
+  border-radius:12px 12px 0 0;
+}
+.card h3{
+  font-family:'Patrick Hand',cursive;font-size:18px;margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;color:var(--ink);
+}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.stat{
+  background:var(--paper);border-radius:12px;padding:16px 12px;text-align:center;
+  box-shadow:var(--shadow);border:2px dashed var(--accent);
+  position:relative;
+}
+.stat::after{
+  content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+  width:40px;height:12px;background:var(--accent-light);
+  border-radius:2px;opacity:.7;
+}
+.stat .n{font-family:'Caveat',cursive;font-size:32px;font-weight:700;color:var(--accent)}
+.stat .l{font-size:12px;color:var(--ink-light);margin-top:4px;font-weight:500}
+button,.btn{
+  background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:12px 18px;font-size:14px;font-weight:600;cursor:pointer;
+  transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  box-shadow:0 2px 4px rgba(0,0,0,.1);
+  font-family:'Inter',sans-serif;
+}
+button:active,.btn:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.btn-sec{background:var(--blue);box-shadow:0 2px 4px rgba(59,130,246,.3)}
+.btn-danger{background:var(--red)}
+.btn-success{background:var(--green)}
+.btn-ghost{background:transparent;color:var(--ink-light);border:2px dashed var(--ink-light);box-shadow:none}
+.btn-block{width:100%}
+.btn-sm{padding:8px 14px;font-size:13px}
+input,select,textarea{
+  width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:10px;
+  font-size:15px;background:#fff;font-family:inherit;transition:all .2s;
+}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,119,6,.1)}
+label{
+  display:block;font-family:'Patrick Hand',cursive;font-size:15px;font-weight:500;
+  color:var(--ink-light);margin-bottom:6px;margin-top:12px;
+}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.list-item{
+  background:var(--paper);border-radius:12px;padding:14px;margin-bottom:10px;
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;
+  cursor:pointer;transition:all .2s;border-left:4px solid var(--accent);
+}
+.list-item:active{transform:scale(.98)}
+.avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent-light));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-weight:700;flex-shrink:0;font-family:'Caveat',cursive;font-size:18px;
+  box-shadow:0 2px 6px rgba(217,119,6,.3);
+}
+.item-main{flex:1;min-width:0}
+.item-title{font-weight:600;font-size:15px}
+.item-sub{font-size:12px;color:var(--ink-light);margin-top:3px}
+.badge{
+  display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;
+  font-weight:600;background:var(--accent-bg);color:#92400e;
+  border:1px solid var(--accent-light);
+}
+.badge.success{background:#d1fae5;color:#065f46;border-color:#6ee7b7}
+.badge.danger{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+.badge.warning{background:#fef3c7;color:#92400e;border-color:#fcd34d}
+.empty{text-align:center;padding:40px 20px;color:var(--ink-light);font-family:'Patrick Hand',cursive;font-size:16px}
+.empty .ico{font-size:56px;margin-bottom:12px;opacity:.6}
+.fab{
+  position:fixed;bottom:90px;right:20px;width:60px;height:60px;border-radius:50%;
+  background:var(--accent);color:#fff;font-size:28px;
+  box-shadow:var(--shadow-lg);z-index:40;display:flex;align-items:center;justify-content:center;
+  border:3px solid #fff;
+}
+nav.tabbar{
+  position:fixed;bottom:0;left:0;right:0;background:var(--paper);
+  border-top:3px solid var(--accent);display:flex;justify-content:space-around;
+  padding:8px 0;z-index:50;box-shadow:0 -2px 10px rgba(0,0,0,.08);
+}
+nav.tabbar button{
+  background:transparent;color:var(--ink-light);flex:1;padding:8px 4px;
+  flex-direction:column;font-size:10px;font-weight:600;border-radius:0;
+  box-shadow:none;
+}
+nav.tabbar button .ic{font-size:22px;margin-bottom:3px}
+nav.tabbar button.active{color:var(--accent)}
+.modal{position:fixed;inset:0;background:rgba(31,41,55,.6);display:none;align-items:flex-end;justify-content:center;z-index:100;animation:fade .2s}
+.modal.active{display:flex}
+.modal-content{
+  background:var(--paper);width:100%;max-width:500px;border-radius:20px 20px 0 0;
+  padding:22px;max-height:90vh;overflow-y:auto;animation:slideUp .3s;
+  border-top:4px solid var(--accent);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;
+  padding-bottom:14px;border-bottom:2px dashed var(--line);
+}
+.modal-header h3{font-family:'Caveat',cursive;font-size:22px;color:var(--accent)}
+.close{background:transparent;color:var(--ink-light);font-size:24px;padding:4px 12px;box-shadow:none}
+.progress{height:10px;background:var(--paper-dark);border-radius:10px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-light));transition:width .3s}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:150px;padding:12px 0;border-bottom:2px dashed var(--line)}
+.bar{
+  flex:1;background:linear-gradient(180deg,var(--accent),var(--accent-light));
+  border-radius:8px 8px 0 0;min-height:6px;position:relative;transition:all .3s;
+  box-shadow:0 2px 4px rgba(217,119,6,.2);
+}
+.bar span{
+  position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  font-size:11px;font-weight:700;color:var(--ink);font-family:'Caveat',cursive;
+}
+.bar-label{font-size:11px;color:var(--ink-light);text-align:center;margin-top:6px;word-break:break-word;font-family:'Patrick Hand',cursive}
+.search{position:relative;margin-bottom:14px}
+.search input{padding-left:40px}
+.search::before{content:"🔍";position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px}
+.kazanim-item{
+  padding:12px;border-radius:10px;background:var(--paper-dark);margin-bottom:8px;
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border-left:3px solid var(--accent);
+}
+.kazanim-item .name{flex:1;font-size:13px}
+.toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:24px;
+  font-size:13px;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;
+  font-family:'Patrick Hand',cursive;font-size:15px;
+}
+.toast.show{opacity:1}
+.tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
+.tabs button{
+  background:var(--paper);color:var(--ink-light);border:2px dashed var(--line);
+  padding:10px 16px;font-size:13px;white-space:nowrap;font-family:'Patrick Hand',cursive;
+  box-shadow:none;
+}
+.tabs button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
+hr{border:none;border-top:2px dashed var(--line);margin:14px 0}
+.install-banner{
+  background:var(--accent-bg);color:#92400e;padding:12px 16px;border-radius:12px;
+  margin-bottom:14px;display:none;align-items:center;gap:12px;font-size:13px;
+  border:2px dashed var(--accent);font-family:'Patrick Hand',cursive;
+}
+.install-banner.show{display:flex}
+.install-banner button{background:var(--accent);color:#fff;padding:8px 14px;font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📓 Türkçe Takip</h1>
+  <div class="sub">Deneme • Kazanım • Koçluk</div>
+</header>
+
+<div class="container">
+
+  <!-- ANA SAYFA -->
+  <div class="view active" id="view-home">
+    <div id="installBanner" class="install-banner">
+      <span>📲 Uygulamayı ana ekrana ekle</span>
+      <button onclick="installApp()">Yükle</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="stStudents">0</div><div class="l">Öğrenci</div></div>
+      <div class="stat"><div class="n" id="stExams">0</div><div class="l">Deneme</div></div>
+      <div class="stat"><div class="n" id="stAvg">0</div><div class="l">Ort. Net</div></div>
+    </div>
+    <div class="card">
+      <h3>📊 Son Deneme Performansı</h3>
+      <div id="homeChart" class="bar-chart"></div>
+      <div id="homeLabels" style="display:flex;gap:8px"></div>
+    </div>
+    <div class="card">
+      <h3>🎯 Zayıf Kazanımlar</h3>
+      <div id="weakList"></div>
+    </div>
+  </div>
+
+  <!-- ÖĞRENCİLER -->
+  <div class="view" id="view-students">
+    <div class="search"><input type="text" id="searchStudent" placeholder="Öğrenci ara..."></div>
+    <div id="studentList"></div>
+  </div>
+
+  <!-- DENEMELER -->
+  <div class="view" id="view-exams">
+    <div id="examList"></div>
+  </div>
+
+  <!-- KAZANIMLAR -->
+  <div class="view" id="view-kazanim">
+    <div class="tabs">
+      <button class="active" onclick="kazanimTab('ogrenci',this)">Öğrenci Bazlı</button>
+      <button onclick="kazanimTab('konu',this)">Konu Bazlı</button>
+    </div>
+    <div id="kazanimContent"></div>
+  </div>
+
+  <!-- RAPORLAR -->
+  <div class="view" id="view-reports">
+    <div class="card">
+      <h3>📈 Sınıf Ortalaması Grafiği</h3>
+      <div id="classChart" class="bar-chart"></div>
+      <div id="classLabels" style="display:flex;gap:8px"></div>
+    </div>
+    <div class="card">
+      <h3>🏆 En Başarılı Öğrenciler</h3>
+      <div id="topStudents"></div>
+    </div>
+    <div class="card">
+      <h3>⚠️ Destek Gerektirenler</h3>
+      <div id="needHelp"></div>
+    </div>
+  </div>
+
+  <!-- YEDEKLEME -->
+  <div class="view" id="view-backup">
+    <div class="card">
+      <h3>💾 Veri Yönetimi</h3>
+      <p style="color:var(--ink-light);font-size:13px;margin-bottom:14px;font-family:'Patrick Hand',cursive">Tüm verilerinizi JSON dosyası olarak dışa aktarabilir veya daha önce aldığınız yedeği geri yükleyebilirsiniz.</p>
+      <button class="btn-block" onclick="exportData()" style="margin-bottom:10px">📤 Verileri Dışa Aktar</button>
+      <button class="btn-block btn-sec" onclick="document.getElementById('importFile').click()">📥 Veri İçe Aktar</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+      <hr>
+      <button class="btn-block btn-danger" onclick="clearAll()">🗑️ Tüm Verileri Sil</button>
+    </div>
+    <div class="card">
+      <h3>ℹ️ Uygulama Hakkında</h3>
+      <p style="font-size:13px;color:var(--ink-light);line-height:1.7;font-family:'Patrick Hand',cursive">
+        <b>Türkçe Takip</b> v1.0<br>
+        Öğrencilerinizin deneme sınavı sonuçlarını ve kazanımlarını takip edin.<br><br>
+        ✅ Çevrimdışı çalışır<br>
+        ✅ Veriler cihazınızda saklanır<br>
+        ✅ Ana ekrana eklenebilir
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="fabAction()">+</button>
+
+<!-- TAB BAR -->
+<nav class="tabbar">
+  <button class="active" data-view="home" onclick="showView('home',this)"><span class="ic">🏠</span>Ana Sayfa</button>
+  <button data-view="students" onclick="showView('students',this)"><span class="ic">👨‍🎓</span>Öğrenciler</button>
+  <button data-view="exams" onclick="showView('exams',this)"><span class="ic">📝</span>Denemeler</button>
+  <button data-view="kazanim" onclick="showView('kazanim',this)"><span class="ic">🎯</span>Kazanım</button>
+  <button data-view="reports" onclick="showView('reports',this)"><span class="ic">📊</span>Rapor</button>
+  <button data-view="backup" onclick="showView('backup',this)"><span class="ic">💾</span>Yedek</button>
+</nav>
+
+<!-- MODALS -->
+<div class="modal" id="modal">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ VERİ YÖNETİMİ ============
+const DB = {
+  students: JSON.parse(localStorage.getItem('tt_students') || '[]'),
+  exams: JSON.parse(localStorage.getItem('tt_exams') || '[]'),
+  results: JSON.parse(localStorage.getItem('tt_results') || '[]'),
+  kazanims: JSON.parse(localStorage.getItem('tt_kazanims') || '[]'),
+  save(){
+    localStorage.setItem('tt_students', JSON.stringify(this.students));
+    localStorage.setItem('tt_exams', JSON.stringify(this.exams));
+    localStorage.setItem('tt_results', JSON.stringify(this.results));
+    localStorage.setItem('tt_kazanims', JSON.stringify(this.kazanims));
+  }
+};
+
+// Varsayılan kazanımlar (Türkçe dersi)
+if(DB.kazanims.length === 0){
+  DB.kazanims = [
+    {id:1,kod:'T.1',ad:'Sözcükte Anlam'},
+    {id:2,kod:'T.2',ad:'Cümlede Anlam'},
+    {id:3,kod:'T.3',ad:'Paragrafta Anlam'},
+    {id:4,kod:'T.4',ad:'Sözcükte Yapı'},
+    {id:5,kod:'T.5',ad:'Fiillerde Çatı'},
+    {id:6,kod:'T.6',ad:'Sözcük Türleri'},
+    {id:7,kod:'T.7',ad:'Cümlenin Ögeleri'},
+    {id:8,kod:'T.8',ad:'Anlatım Bozukluğu'},
+    {id:9,kod:'T.9',ad:'Yazım Kuralları'},
+    {id:10,kod:'T.10',ad:'Noktalama İşaretleri'},
+    {id:11,kod:'T.11',ad:'Sözcük Yorumu'},
+    {id:12,kod:'T.12',ad:'Dil Bilgisi'}
+  ];
+  DB.save();
+}
+
+// ============ YARDIMCI FONKSİYONLAR ============
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const uid = () => Date.now() + Math.floor(Math.random()*1000);
+const toast = msg => { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2000); };
+const initials = n => n.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+const formatDate = d => new Date(d).toLocaleDateString('tr-TR',{day:'2-digit',month:'short',year:'numeric'});
+
+// ============ GÖRÜNÜM YÖNETİMİ ============
+let currentView = 'home';
+function showView(name, btn){
+  currentView = name;
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#view-'+name).classList.add('active');
+  $$('.tabbar button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  else $(`.tabbar button[data-view="${name}"]`).classList.add('active');
+  render();
+  window.scrollTo(0,0);
+}
+
+function fabAction(){
+  if(currentView==='home'||currentView==='students') openStudentModal();
+  else if(currentView==='exams') openExamModal();
+  else if(currentView==='kazanim') openKazanimModal();
+  else openStudentModal();
+}
+
+// ============ MODAL ============
+function openModal(html){
+  $('#modalContent').innerHTML = html;
+  $('#modal').classList.add('active');
+}
+function closeModal(){ $('#modal').classList.remove('active'); }
+$('#modal').addEventListener('click', e=>{ if(e.target.id==='modal') closeModal(); });
+
+// ============ ÖĞRENCİ ============
+function openStudentModal(id){
+  const s = id ? DB.students.find(x=>x.id===id) : {ad:'',sinif:''};
+  openModal(`
+    <div class="modal-header">
+      <h3>${id?'✏️ Öğrenci Düzenle':'✨ Yeni Öğrenci'}</h3>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <label>Ad Soyad</label>
+    <input id="sName" value="${s.ad||''}" placeholder="Örn: Ahmet Yılmaz">
+    <label>Sınıf</label>
+    <input id="sClass" value="${s.sinif||''}" placeholder="Örn: 12-A">
+    <div style="margin-top:18px;display:flex;gap:10px">
+      ${id?`<button class="btn-danger" onclick="deleteStudent(${id})">Sil</button>`:''}
+      <button class="btn-success" style="flex:1" onclick="saveStudent(${id||'null'})">💾 Kaydet</button>
+    </div>
+  `);
+}
+function saveStudent(id){
+  const ad = $('#sName').value.trim();
+  const sinif = $('#sClass').value.trim();
+  if(!ad){ toast('Ad gerekli!'); return; }
+  if(id){
+    const s = DB.students.find(x=>x.id===id);
+    s.ad=ad; s.sinif=sinif;
+  } else {
+    DB.students.push({id:uid(),ad,sinif});
+  }
+  DB.save(); closeModal(); render(); toast('Kaydedildi ✓');
+}
+function deleteStudent(id){
+  if(!confirm('Bu öğrenci ve tüm kayıtları silinecek. Emin misiniz?')) return;
+  DB.students = DB.students.filter(s=>s.id!==id);
+  DB.results = DB.results.filter(r=>r.studentId!==id);
+  DB.save(); closeModal(); render(); toast('Silindi');
+}
+
+// ============ DENEME ============
+function openExamModal(id){
+  const e = id ? DB.exams.find(x=>x.id===id) : {ad:'',tarih:new Date().toISOString().slice(0,10),toplu:40};
+  openModal(`
+    <div class="modal-header">
+      <h3>${id?'✏️ Deneme Düzenle':'✨ Yeni Deneme'}</h3>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <label>Deneme Adı</label>
+    <input id="eName" value="${e.ad||''}" placeholder="Örn: 1. Deneme Sınavı">
+    <label>Tarih</label>
+    <input type="date" id="eDate" value="${e.tarih}">
+    <label>Toplam Soru</label>
+    <input type="number" id="eTotal" value="${e.toplu||40}" min="1">
+    <div style="margin-top:18px;display:flex;gap:10px">
+      ${id?`<button class="btn-danger" onclick="deleteExam(${id})">Sil</button>`:''}
+      <button class="btn-success" style="flex:1" onclick="saveExam(${id||'null'})">💾 Kaydet</button>
+    </div>
+  `);
+}
+function saveExam(id){
+  const ad = $('#eName').value.trim();
+  const tarih = $('#eDate').value;
+  const toplu = parseInt($('#eTotal').value)||40;
+  if(!ad){ toast('Ad gerekli!'); return; }
+  if(id){
+    const e = DB.exams.find(x=>x.id===id);
+    Object.assign(e,{ad,tarih,toplu});
+  } else {
+    DB.exams.push({id:uid(),ad,tarih,toplu});
+  }
+  DB.save(); closeModal(); render(); toast('Kaydedildi ✓');
+}
+function deleteExam(id){
+  if(!confirm('Bu deneme ve tüm sonuçları silinecek. Emin misiniz?')) return;
+  DB.exams = DB.exams.filter(e=>e.id!==id);
+  DB.results = DB.results.filter(r=>r.examId!==id);
+  DB.save(); closeModal(); render(); toast('Silindi');
+}
+
+// ============ SONUÇ GİRİŞİ ============
+function openResultModal(examId, studentId){
+  const exam = DB.exams.find(e=>e.id===examId);
+  const student = DB.students.find(s=>s.id===studentId);
+  const existing = DB.results.find(r=>r.examId===examId && r.studentId===studentId) || {};
+  
+  const kazanimInputs = DB.kazanims.map(k=>{
+    const val = existing.kazanims?.[k.id] || '';
+    return `
+      <div class="kazanim-item">
+        <div class="name"><b>${k.kod}</b> ${k.ad}</div>
+        <select data-k="${k.id}" style="width:90px">
+          <option value="">-</option>
+          <option value="1" ${val==='1'?'selected':''}>✓</option>
+          <option value="0" ${val==='0'?'selected':''}>✗</option>
+        </select>
+      </div>`;
+  }).join('');
+
+  openModal(`
+    <div class="modal-header">
+      <h3>📝 Sonuç Gir</h3>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <div style="background:var(--accent-bg);padding:12px;border-radius:10px;margin-bottom:14px;border:2px dashed var(--accent)">
+      <div style="font-weight:600;font-family:'Patrick Hand',cursive;font-size:16px">${student.ad}</div>
+      <div style="font-size:12px;color:var(--ink-light);margin-top:2px">${exam.ad} • ${formatDate(exam.tarih)}</div>
+    </div>
+    <div class="form-row">
+      <div><label>Doğru</label><input type="number" id="rDogru" value="${existing.dogru||0}" min="0"></div>
+      <div><label>Yanlış</label><input type="number" id="rYanlis" value="${existing.yanlis||0}" min="0"></div>
+    </div>
+    <div style="margin-top:8px;font-size:14px;color:var(--ink-light);font-family:'Patrick Hand',cursive">Net: <b id="rNet" style="color:var(--accent);font-size:18px">0</b> / ${exam.toplu}</div>
+    <hr>
+    <label style="margin-bottom:10px">🎯 Kazanım Bazlı İşaretleme</label>
+    ${kazanimInputs}
+    <div style="margin-top:18px">
+      <button class="btn-success btn-block" onclick="saveResult(${examId},${studentId})">💾 Kaydet</button>
+    </div>
+  `);
+  const updNet = ()=>{
+    const d=parseInt($('#rDogru').value)||0, y=parseInt($('#rYanlis').value)||0;
+    $('#rNet').textContent = (d - y/4).toFixed(2);
+  };
+  $('#rDogru').addEventListener('input',updNet);
+  $('#rYanlis').addEventListener('input',updNet);
+  updNet();
+}
+function saveResult(examId,studentId){
+  const dogru = parseInt($('#rDogru').value)||0;
+  const yanlis = parseInt($('#rYanlis').value)||0;
+  const kazanims = {};
+  $$('[data-k]').forEach(el=>{ if(el.value) kazanims[el.dataset.k] = el.value; });
+  const net = dogru - yanlis/4;
+  const existing = DB.results.findIndex(r=>r.examId===examId && r.studentId===studentId);
+  const rec = {examId,studentId,dogru,yanlis,net,kazanims};
+  if(existing>=0) DB.results[existing]=rec;
+  else DB.results.push(rec);
+  DB.save(); closeModal(); render(); toast('Kaydedildi ✓');
+}
+
+// ============ KAZANIM EKLEME ============
+function openKazanimModal(id){
+  const k = id ? DB.kazanims.find(x=>x.id===id) : {kod:'',ad:''};
+  openModal(`
+    <div class="modal-header">
+      <h3>${id?'✏️ Kazanım Düzenle':'✨ Yeni Kazanım'}</h3>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <label>Kod</label>
+    <input id="kKod" value="${k.kod||''}" placeholder="Örn: T.13">
+    <label>Kazanım Adı</label>
+    <input id="kAd" value="${k.ad||''}" placeholder="Örn: Ana Düşünce">
+    <div style="margin-top:18px;display:flex;gap:10px">
+      ${id?`<button class="btn-danger" onclick="deleteKazanim(${id})">Sil</button>`:''}
+      <button class="btn-success" style="flex:1" onclick="saveKazanim(${id||'null'})">💾 Kaydet</button>
+    </div>
+  `);
+}
+function saveKazanim(id){
+  const kod = $('#kKod').value.trim();
+  const ad = $('#kAd').value.trim();
+  if(!kod||!ad){ toast('Alanları doldurun!'); return; }
+  if(id){ const k=DB.kazanims.find(x=>x.id===id); k.kod=kod; k.ad=ad; }
+  else DB.kazanims.push({id:uid(),kod,ad});
+  DB.save(); closeModal(); render(); toast('Kaydedildi ✓');
+}
+function deleteKazanim(id){
+  if(!confirm('Kazanım silinsin mi?')) return;
+  DB.kazanims = DB.kazanims.filter(k=>k.id!==id);
+  DB.save(); closeModal(); render(); toast('Silindi');
+}
+
+// ============ ÖĞRENCİ DETAY ============
+function openStudentDetail(id){
+  const s = DB.students.find(x=>x.id===id);
+  const results = DB.results.filter(r=>r.studentId===id).sort((a,b)=>{
+    const ea=DB.exams.find(e=>e.id===a.examId), eb=DB.exams.find(e=>e.id===b.examId);
+    return new Date(eb.tarih)-new Date(ea.tarih);
+  });
+  const avg = results.length ? (results.reduce((a,r)=>a+r.net,0)/results.length).toFixed(2) : 0;
+  
+  const kazStats = {};
+  DB.kazanims.forEach(k=>{ kazStats[k.id]={dogru:0,toplam:0}; });
+  results.forEach(r=>{
+    Object.entries(r.kazanims||{}).forEach(([kid,val])=>{
+      if(kazStats[kid]){
+        kazStats[kid].toplam++;
+        if(val==='1') kazStats[kid].dogru++;
+      }
+    });
+  });
+
+  const kazHtml = DB.kazanims.map(k=>{
+    const st = kazStats[k.id];
+    const pct = st.toplam ? Math.round(st.dogru/st.toplam*100) : 0;
+    const cls = pct>=70?'success':pct>=40?'warning':'danger';
+    return `<div class="kazanim-item">
+      <div class="name"><b>${k.kod}</b> ${k.ad}<br><small style="color:var(--ink-light)">${st.dogru}/${st.toplam} doğru</small></div>
+      <span class="badge ${cls}">%${pct}</span>
+    </div>`;
+  }).join('');
+
+  const resHtml = results.length ? results.map(r=>{
+    const e = DB.exams.find(x=>x.id===r.examId);
+    return `<div class="list-item">
+      <div class="item-main">
+        <div class="item-title">${e?.ad||'?'}</div>
+        <div class="item-sub">${formatDate(e?.tarih)} • ${r.dogru}D ${r.yanlis}Y</div>
+      </div>
+      <span class="badge">${r.net.toFixed(2)} net</span>
+    </div>`;
+  }).join('') : '<div class="empty"><div class="ico">📝</div>Henüz sonuç yok</div>';
+
+  openModal(`
+    <div class="modal-header">
+      <h3>📖 ${s.ad}</h3>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat"><div class="n">${s.sinif||'-'}</div><div class="l">Sınıf</div></div>
+      <div class="stat"><div class="n">${results.length}</div><div class="l">Deneme</div></div>
+      <div class="stat"><div class="n">${avg}</div><div class="l">Ort. Net</div></div>
+    </div>
+    <h3 style="font-family:'Patrick Hand',cursive;font-size:16px;margin-bottom:10px">🎯 Kazanım Durumu</h3>
+    ${kazHtml||'<div class="empty">Veri yok</div>'}
+    <hr>
+    <h3 style="font-family:'Patrick Hand',cursive;font-size:16px;margin:12px 0 10px">📝 Deneme Geçmişi</h3>
+    ${resHtml}
+    <button class="btn-ghost btn-block" style="margin-top:14px" onclick="closeModal();openStudentModal(${id})">✏️ Düzenle</button>
+  `);
+}
+
+// ============ RENDER ============
+function render(){
+  // İstatistikler
+  $('#stStudents').textContent = DB.students.length;
+  $('#stExams').textContent = DB.exams.length;
+  const allNets = DB.results.map(r=>r.net);
+  $('#stAvg').textContent = allNets.length ? (allNets.reduce((a,b)=>a+b,0)/allNets.length).toFixed(1) : '0';
+
+  // Ana sayfa grafiği
+  renderHomeChart();
+  renderWeakList();
+  renderStudents();
+  renderExams();
+  renderKazanim();
+  renderReports();
+}
+
+function renderHomeChart(){
+  const exams = [...DB.exams].sort((a,b)=>new Date(a.tarih)-new Date(b.tarih)).slice(-6);
+  const chart = $('#homeChart'), labels = $('#homeLabels');
+  if(!exams.length){ chart.innerHTML='<div class="empty" style="width:100%">Henüz deneme yok</div>'; labels.innerHTML=''; return; }
+  const maxNet = Math.max(...exams.map(e=>{
+    const rs = DB.results.filter(r=>r.examId===e.id);
+    return rs.length ? rs.reduce((a,r)=>a+r.net,0)/rs.length : 0;
+  }), 1);
+  chart.innerHTML = exams.map(e=>{
+    const rs = DB.results.filter(r=>r.examId===e.id);
+    const avg = rs.length ? rs.reduce((a,r)=>a+r.net,0)/rs.length : 0;
+    const h = Math.max((avg/maxNet)*100, 6);
+    return `<div class="bar" style="height:${h}%"><span>${avg.toFixed(1)}</span></div>`;
+  }).join('');
+  labels.innerHTML = exams.map(e=>`<div class="bar-label" style="flex:1">${e.ad.slice(0,10)}</div>`).join('');
+}
+
+function renderWeakList(){
+  const stats = {};
+  DB.kazanims.forEach(k=>stats[k.id]={dogru:0,toplam:0,k});
+  DB.results.forEach(r=>{
+    Object.entries(r.kazanims||{}).forEach(([kid,v])=>{
+      if(stats[kid]){ stats[kid].toplam++; if(v==='1') stats[kid].dogru++; }
+    });
+  });
+  const arr = Object.values(stats).filter(s=>s.toplam>0).sort((a,b)=>(a.dogru/a.toplam)-(b.dogru/b.toplam)).slice(0,5);
+  const el = $('#weakList');
+  if(!arr.length){ el.innerHTML='<div class="empty">Kazanım verisi yok</div>'; return; }
+  el.innerHTML = arr.map(s=>{
+    const pct = Math.round(s.dogru/s.toplam*100);
+    return `<div class="kazanim-item">
+      <div class="name"><b>${s.k.kod}</b> ${s.k.ad}</div>
+      <span class="badge danger">%${pct}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderStudents(){
+  const q = ($('#searchStudent')?.value||'').toLowerCase();
+  const list = DB.students.filter(s=>s.ad.toLowerCase().includes(q));
+  const el = $('#studentList');
+  if(!list.length){ el.innerHTML='<div class="empty"><div class="ico">👨‍🎓</div>Öğrenci yok<br><small>Sağ alttaki + ile ekleyin</small></div>'; return; }
+  el.innerHTML = list.map(s=>{
+    const rs = DB.results.filter(r=>r.studentId===s.id);
+    const avg = rs.length ? (rs.reduce((a,r)=>a+r.net,0)/rs.length).toFixed(1) : '-';
+    return `<div class="list-item" onclick="openStudentDetail(${s.id})">
+      <div class="avatar">${initials(s.ad)}</div>
+      <div class="item-main">
+        <div class="item-title">${s.ad}</div>
+        <div class="item-sub">${s.sinif||'Sınıf yok'} • ${rs.length} deneme</div>
+      </div>
+      <span class="badge">${avg} net</span>
+    </div>`;
+  }).join('');
+}
+$('#searchStudent')?.addEventListener('input', renderStudents);
+
+function renderExams(){
+  const el = $('#examList');
+  if(!DB.exams.length){ el.innerHTML='<div class="empty"><div class="ico">📝</div>Deneme yok<br><small>Sağ alttaki + ile ekleyin</small></div>'; return; }
+  const exams = [...DB.exams].sort((a,b)=>new Date(b.tarih)-new Date(a.tarih));
+  el.innerHTML = exams.map(e=>{
+    const rs = DB.results.filter(r=>r.examId===e.id);
+    const avg = rs.length ? (rs.reduce((a,r)=>a+r.net,0)/rs.length).toFixed(1) : '-';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:12px">
+        <div>
+          <h3 style="margin:0">${e.ad}</h3>
+          <div style="font-size:12px;color:var(--ink-light);margin-top:3px">${formatDate(e.tarih)} • ${e.toplu} soru</div>
+        </div>
+        <span class="badge">${avg} net</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-sm btn-sec" onclick="openExamModal(${e.id})">✏️ Düzenle</button>
+        <button class="btn-sm btn-success" onclick="openResultEntry(${e.id})">📝 Sonuç Gir</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openResultEntry(examId){
+  if(!DB.students.length){ toast('Önce öğrenci ekleyin!'); return; }
+  const exam = DB.exams.find(e=>e.id===examId);
+  const rows = DB.students.map(s=>{
+    const r = DB.results.find(x=>x.examId===examId && x.studentId===s.id);
+    return `<div class="list-item" onclick="openResultModal(${examId},${s.id})">
+      <div class="avatar">${initials(s.ad)}</div>
+      <div class="item-main">
+        <div class="item-title">${s.ad}</div>
+        <div class="item-sub">${s.sinif||''}</div>
+      </div>
+      ${r?`<span class="badge success">${r.net.toFixed(1)} net</span>`:'<span class="badge warning">Girilmedi</span>'}
+    </div>`;
+  }).join('');
+  openModal(`
+    <div class="modal-header">
+      <h3>📋 ${exam.ad}</h3>
+      <button class="close" onclick="closeModal()">✕</button>
+    </div>
+    <p style="font-size:13px;color:var(--ink-light);margin-bottom:14px;font-family:'Patrick Hand',cursive">Öğrenciye tıklayarak sonuç girin</p>
+    ${rows}
+  `);
+}
+
+let kazanimMode = 'ogrenci';
+function kazanimTab(mode,btn){
+  kazanimMode = mode;
+  $$('.tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderKazanim();
+}
+function renderKazanim(){
+  const el = $('#kazanimContent');
+  if(kazanimMode==='ogrenci'){
+    if(!DB.students.length){ el.innerHTML='<div class="empty">Öğrenci yok</div>'; return; }
+    el.innerHTML = DB.students.map(s=>{
+      const stats = {};
+      let toplam=0, dogru=0;
+      DB.kazanims.forEach(k=>stats[k.id]={dogru:0,toplam:0});
+      DB.results.filter(r=>r.studentId===s.id).forEach(r=>{
+        Object.entries(r.kazanims||{}).forEach(([kid,v])=>{
+          if(stats[kid]){ stats[kid].toplam++; toplam++; if(v==='1'){stats[kid].dogru++; dogru++;} }
+        });
+      });
+      const pct = toplam ? Math.round(dogru/toplam*100) : 0;
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><b>${s.ad}</b><div style="font-size:12px;color:var(--ink-light)">${s.sinif||''}</div></div>
+          <span class="badge ${pct>=70?'success':pct>=40?'warning':'danger'}">%${pct}</span>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+      </div>`;
+    }).join('');
+  } else {
+    el.innerHTML = `<button class="btn-sec btn-block btn-sm" style="margin-bottom:12px" onclick="openKazanimModal()">+ Yeni Kazanım</button>` +
+      DB.kazanims.map(k=>{
+        let dogru=0,toplam=0;
+        DB.results.forEach(r=>{
+          const v = r.kazanims?.[k.id];
+          if(v){ toplam++; if(v==='1') dogru++; }
+        });
+        const pct = toplam ? Math.round(dogru/toplam*100) : 0;
+        return `<div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div><b>${k.kod}</b> ${k.ad}</div>
+            <button class="btn-ghost btn-sm" onclick="openKazanimModal(${k.id})">✏️</button>
+          </div>
+          <div style="font-size:12px;color:var(--ink-light);margin-bottom:8px">${dogru}/${toplam} doğru</div>
+          <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+          <div style="text-align:right;font-size:13px;margin-top:6px;font-weight:600;color:${pct>=70?'var(--green)':pct>=40?'var(--accent)':'var(--red)'};font-family:'Patrick Hand',cursive">%${pct}</div>
+        </div>`;
+      }).join('');
+  }
+}
+
+function renderReports(){
+  // Sınıf ortalaması
+  const exams = [...DB.exams].sort((a,b)=>new Date(a.tarih)-new Date(b.tarih)).slice(-8);
+  const chart = $('#classChart'), labels = $('#classLabels');
+  if(!exams.length){ chart.innerHTML='<div class="empty" style="width:100%">Veri yok</div>'; labels.innerHTML=''; }
+  else {
+    const avgs = exams.map(e=>{
+      const rs = DB.results.filter(r=>r.examId===e.id);
+      return rs.length ? rs.reduce((a,r)=>a+r.net,0)/rs.length : 0;
+    });
+    const max = Math.max(...avgs,1);
+    chart.innerHTML = avgs.map(a=>`<div class="bar" style="height:${Math.max(a/max*100,6)}%"><span>${a.toFixed(1)}</span></div>`).join('');
+    labels.innerHTML = exams.map(e=>`<div class="bar-label" style="flex:1">${e.ad.slice(0,10)}</div>`).join('');
+  }
+
+  // En başarılı
+  const tops = DB.students.map(s=>{
+    const rs = DB.results.filter(r=>r.studentId===s.id);
+    const avg = rs.length ? rs.reduce((a,r)=>a+r.net,0)/rs.length : 0;
+    return {s,avg,n:rs.length};
+  }).filter(x=>x.n>0).sort((a,b)=>b.avg-a.avg).slice(0,5);
+  $('#topStudents').innerHTML = tops.length ? tops.map((x,i)=>`
+    <div class="list-item">
+      <div class="avatar" style="background:${i===0?'linear-gradient(135deg,#f59e0b,#d97706)':i===1?'linear-gradient(135deg,#94a3b8,#64748b)':i===2?'linear-gradient(135deg,#b45309,#92400e)':'var(--accent)'}">${i+1}</div>
+      <div class="item-main"><div class="item-title">${x.s.ad}</div><div class="item-sub">${x.s.sinif||''}</div></div>
+      <span class="badge success">${x.avg.toFixed(1)} net</span>
+    </div>`).join('') : '<div class="empty">Veri yok</div>';
+
+  // Destek
+  const needs = DB.students.map(s=>{
+    const rs = DB.results.filter(r=>r.studentId===s.id);
+    const avg = rs.length ? rs.reduce((a,r)=>a+r.net,0)/rs.length : 0;
+    return {s,avg,n:rs.length};
+  }).filter(x=>x.n>0).sort((a,b)=>a.avg-b.avg).slice(0,5);
+  $('#needHelp').innerHTML = needs.length ? needs.map(x=>`
+    <div class="list-item" onclick="openStudentDetail(${x.s.id})">
+      <div class="avatar" style="background:var(--red)">${initials(x.s.ad)}</div>
+      <div class="item-main"><div class="item-title">${x.s.ad}</div><div class="item-sub">${x.s.sinif||''}</div></div>
+      <span class="badge danger">${x.avg.toFixed(1)} net</span>
+    </div>`).join('') : '<div class="empty">Veri yok</div>';
+}
+
+// ============ YEDEKLEME ============
+function exportData(){
+  const data = {students:DB.students,exams:DB.exams,results:DB.results,kazanims:DB.kazanims,exportDate:new Date().toISOString()};
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `turkce-takip-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  toast('Dışa aktarıldı ✓');
+}
+function importData(e){
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const d = JSON.parse(ev.target.result);
+      if(!confirm('Mevcut veriler silinip yerine bu yedek yüklenecek. Devam?')) return;
+      DB.students = d.students||[];
+      DB.exams = d.exams||[];
+      DB.results = d.results||[];
+      DB.kazanims = d.kazanims||DB.kazanims;
+      DB.save(); render(); toast('İçe aktarıldı ✓');
+    } catch(err){ toast('Hatalı dosya!'); }
+  };
+  r.readAsText(f);
+}
+function clearAll(){
+  if(!confirm('TÜM VERİLER SİLİNECEK! Emin misiniz?')) return;
+  if(!confirm('Son kez: Geri alınamaz. Devam?')) return;
+  DB.students=[]; DB.exams=[]; DB.results=[];
+  DB.save(); render(); toast('Temizlendi');
+}
+
+// ============ PWA ============
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  $('#installBanner').classList.add('show');
+});
+function installApp(){
+  if(!deferredPrompt) { toast('Menüden "Ana ekrana ekle"yi kullanın'); return; }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.finally(()=>{
+    deferredPrompt = null;
+    $('#installBanner').classList.remove('show');
+  });
+}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// İlk render
+render();
+</script>
+</body>
+</html>
